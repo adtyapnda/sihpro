@@ -1,1271 +1,770 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart LT Line Fault Detection & Isolation System</title>
+    <title>Smart LT Fault Detection - Auto AI Dispatch</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background: white;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Navigation and basic styles (keeping existing) */
-        nav {
-            background: white;
-            border-bottom: 1px solid #ddd;
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
-        }
-        .nav-links a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-        }
-        .nav-links a:hover {
-            color: #666;
-        }
-        .hero {
-            padding: 4rem 0;
-            text-align: center;
-            background: #f8f9fa;
-            border-bottom: 1px solid #ddd;
-        }
-        .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            color: #333;
-        }
-        .tagline {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            color: #666;
-            font-style: italic;
-        }
-        .hero p {
-            font-size: 1rem;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .cta-button {
-            display: inline-block;
-            background: #333;
-            color: white;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .cta-button:hover {
-            background: #555;
-        }
-        .section {
-            padding: 3rem 0;
-            border-bottom: 1px solid #eee;
-        }
-        .section-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 2rem;
-            color: #333;
-        }
-        
-        /* Interactive Tutorial Styles */
-        .tutorial-panel {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-        
-        .tutorial-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .tutorial-button {
-            background: #2196f3;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            margin: 0 5px;
-        }
-        
-        .tutorial-button:hover {
-            background: #1976d2;
-        }
-        
-        .tutorial-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .tutorial-step {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 1rem;
-            margin-top: 1rem;
-            display: none;
-        }
-        
-        .tutorial-step.active {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        
-        .step-dot {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .step-dot.active {
-            background: #2196f3;
-            color: white;
-        }
-        
-        .step-dot.completed {
-            background: #4caf50;
-            color: white;
-        }
-        
-        /* Enhanced Circuit Simulation Styles */
-        .circuit-simulation {
-            background: white;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 2rem;
-            margin: 2rem 0;
-            position: relative;
-            min-height: 600px;
-        }
-        
-        .circuit-canvas {
-            width: 100%;
-            height: 350px;
-            border: 1px solid #ddd;
-            background: #f8f9fa;
-            position: relative;
-            overflow: hidden;
+            font-family: arial;
+            margin: 10px;
+            font-size: 12px;
+            overflow-x: auto;
         }
         
         .power-line {
+            height: 3px;
+            background: black;
             position: absolute;
-            height: 6px;
-            background: #28a745;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-        
-        .power-line:hover {
-            height: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
         .power-line.fault {
-            background: #dc3545;
-            animation: fault-flash 1s infinite;
+            background: red;
+            animation: blink 0.5s infinite;
         }
         
-        .power-line.isolated {
-            background: #ffc107;
+        .power-line.repairing {
+            background: orange;
         }
         
-        @keyframes fault-flash {
+        @keyframes blink {
             0%, 50% { opacity: 1; }
-            25%, 75% { opacity: 0.3; }
+            51%, 100% { opacity: 0.3; }
         }
         
-        .sensor-node {
+        .circuit-area {
+            border: 1px solid black;
+            height: 300px;
+            position: relative;
+            margin: 5px 0;
+            width: 1050px;
+        }
+        
+        .sensor {
             position: absolute;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #28a745;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 12px;
+            height: 12px;
+            background: black;
             color: white;
+            font-size: 6px;
+            text-align: center;
+            line-height: 12px;
+        }
+        
+        .sensor.fault {
+            background: red;
+            animation: flash 0.8s infinite;
+        }
+        
+        .sensor.repairing {
+            background: orange;
+        }
+        
+        @keyframes flash {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .pole {
+            position: absolute;
+            width: 2px;
+            height: 25px;
+            background: brown;
+        }
+        
+        /* Simulation Box Styles */
+        .simulation-box {
+            position: absolute;
+            border: 2px solid #007bff;
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 10px;
+            width: 140px;
+            height: 120px;
+        }
+        
+        .sim-box-title {
             font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #007bff;
+        }
+        
+        .sim-button {
+            width: 100%;
+            padding: 6px;
+            margin: 3px 0;
+            font-size: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
             font-weight: bold;
         }
         
-        .sensor-node:hover {
-            transform: scale(1.2);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
-        
-        .sensor-node.warning {
-            background: #ffc107;
-            animation: pulse 2s infinite;
-        }
-        
-        .sensor-node.fault {
-            background: #dc3545;
-            animation: pulse 1s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-        }
-        
-        /* Tooltip Styles */
-        .tooltip {
-            position: absolute;
-            background: #333;
+        .sim-button.overload {
+            background: #ff6b35;
             color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            z-index: 1000;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
         
-        .tooltip.show {
-            opacity: 1;
+        .sim-button.arc {
+            background: #dc3545;
+            color: white;
         }
         
-        .tooltip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
+        .sim-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
-        /* Interactive Elements */
-        .circuit-controls {
+        .main-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .circuit-button {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .circuit-button:hover {
-            background: #555;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .circuit-button.danger {
-            background: #dc3545;
-        }
-        
-        .circuit-button.danger:hover {
-            background: #c82333;
-        }
-        
-        .circuit-button.highlighted {
-            animation: highlight 2s infinite;
-        }
-        
-        @keyframes highlight {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7); }
-            50% { box-shadow: 0 0 0 10px rgba(33, 150, 243, 0); }
-        }
-        
-        /* Technician Dispatch System */
-        .technician-panel {
-            background: #f8f9fa;
-            border: 2px solid #6c757d;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .technician-input-group {
-            display: flex;
-            align-items: center;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 10px;
             margin-top: 10px;
         }
         
-        .technician-input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-            font-size: 0.9rem;
+        .panel {
+            border: 1px solid black;
+            padding: 8px;
+            font-size: 11px;
         }
         
-        .technician-button {
-            background: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        
-        .technician-button:hover {
-            background: #0056b3;
-        }
-        
-        .technician-response {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: none;
-        }
-        
-        .technician-response.success {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
-        }
-        
-        .technician-response.warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            color: #856404;
-        }
-        
-        .technician-response.error {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
-        }
-        
-        .sensor-data-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        
-        .sensor-reading {
-            background: #f8f9fa;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .sensor-reading:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        
-        .sensor-reading h5 {
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-        
-        .ai-prediction-panel {
-            background: #e9ecef;
-            padding: 1.5rem;
-            border-radius: 4px;
-            margin-top: 1rem;
-        }
-        
-        .ai-prediction-panel h4 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-        
-        .prediction-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-family: monospace;
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            background: white;
-            border-radius: 3px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .prediction-item:hover {
-            background: #f0f0f0;
-        }
-        
-        .legend {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        
-        .legend-color.normal { background: #28a745; }
-        .legend-color.warning { background: #ffc107; }
-        .legend-color.fault { background: #dc3545; }
-        
-        /* Progress indicator */
-        .tutorial-progress {
+        table {
             width: 100%;
-            height: 4px;
-            background: #ddd;
-            border-radius: 2px;
-            margin-bottom: 1rem;
+            border-collapse: collapse;
+            font-size: 10px;
         }
         
-        .tutorial-progress-bar {
-            height: 100%;
-            background: #2196f3;
-            border-radius: 2px;
-            transition: width 0.3s ease;
+        th, td {
+            border: 1px solid black;
+            padding: 2px;
+            text-align: left;
         }
         
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            .nav-links {
-                display: none;
-            }
-            .tutorial-controls {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .step-indicator {
-                flex-wrap: wrap;
-            }
-            .technician-input-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
+        .status-fault { color: red; font-weight: bold; }
+        .status-repairing { color: orange; font-weight: bold; }
+        .status-ok { color: green; }
+        
+        .dispatch-notification {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: orange;
+            color: white;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 10px;
+            max-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .dispatch-notification.show {
+            display: block;
+        }
+        
+        .controls {
+            margin: 5px 0;
+        }
+        
+        button {
+            font-size: 11px;
+            padding: 3px 6px;
+            margin: 1px;
+        }
+        
+        .danger {
+            background: red;
+            color: white;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 60px;
+            font-size: 10px;
+        }
+        
+        .alert {
+            background: #ffcccc;
+            border: 1px solid red;
+            padding: 5px;
+            margin: 5px 0;
+            font-size: 11px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="container">
-            <div class="nav-container">
-                <div class="logo">SmartLT</div>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#simulation">Interactive Simulation</a></li>
-                    <li><a href="#solution">Solution</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </div>
+
+<h2>Smart LT Line Fault Detection & Auto-AI Dispatch System</h2>
+
+<div class="controls">
+    <button onclick="resetSystem()">Reset</button>
+    <button class="danger" onclick="simulateLineFault(1)">Break L1</button>
+    <button class="danger" onclick="simulateLineFault(2)">Break L2</button>
+    <button class="danger" onclick="simulateLineFault(3)">Break L3</button>
+</div>
+
+<div class="circuit-area" id="circuitArea">
+    <!-- Simulation Box -->
+    <div class="simulation-box" style="left: 870px; top: 20px;">
+        <div class="sim-box-title">⚡ FAULT SIMULATOR</div>
+        <button class="sim-button overload" onclick="simulateOverload()">
+            🔥 OVERLOAD
+        </button>
+        <button class="sim-button arc" onclick="simulateArcFault()">
+            ⚡ ARC FAULT
+        </button>
+        <div style="font-size: 8px; text-align: center; margin-top: 5px; color: #666;">
+            AI Auto-Dispatch Enabled
         </div>
-    </nav>
+    </div>
+</div>
 
-    <section id="home" class="hero">
-        <div class="container">
-            <h1>Smart LT Line Fault Detection & Isolation System</h1>
-            <p class="tagline">Smart, Safe, and Self-Healing LT Power Distribution</p>
-            <p>Experience our interactive AI/ML-powered simulation that demonstrates real-time fault detection and isolation in LT power lines. Follow our guided tutorial to understand how intelligent fault detection works.</p>
-            <a href="#simulation" class="cta-button">Start Interactive Tutorial</a>
-        </div>
-    </section>
+<div class="main-grid">
+    <!-- Left Panel: Sensor Data -->
+    <div class="panel">
+        <h4>Field Layer Sensors</h4>
+        <table id="sensorTable">
+            <tr><th>Node</th><th>mA</th><th>V</th><th>Status</th><th>AI</th></tr>
+        </table>
+    </div>
+    
+    <!-- Middle Panel: AI System -->
+    <div class="panel">
+        <h4>AI Analysis & Auto-Dispatch</h4>
+        <table>
+            <tr><td>System Status</td><td id="ai-status">OPERATIONAL</td></tr>
+            <tr><td>Anomaly Score</td><td id="anomaly">0.02</td></tr>
+            <tr><td>Fault Prob</td><td id="fault-prob">2.1%</td></tr>
+            <tr><td>Auto-Dispatch</td><td id="dispatch-status">READY</td></tr>
+            <tr><td>Repair ETA</td><td id="repair-eta">N/A</td></tr>
+        </table>
+        
+        <h4>Smart Relays</h4>
+        <table id="relayTable">
+            <tr><th>Relay</th><th>Status</th><th>Current</th></tr>
+        </table>
+    </div>
+    
+    <!-- Right Panel: System Log -->
+    <div class="panel">
+        <h4>System Events (Real-time)</h4>
+        <textarea id="eventLog" readonly>System ready - 3 lines, 15 sensors active
+AI Auto-Dispatch: ARMED
+Fault detection: ACTIVE
+All sensors normal</textarea>
+    </div>
+</div>
 
-    <section id="simulation" class="section">
-        <div class="container">
-            <h2 class="section-title">Interactive AI/ML Circuit Simulation</h2>
-            
-            <!-- Interactive Tutorial Panel -->
-            <div class="tutorial-panel">
-                <div class="tutorial-controls">
-                    <div>
-                        <button class="tutorial-button" onclick="startTutorial()">Start Tutorial</button>
-                        <button class="tutorial-button" onclick="prevStep()" id="prevBtn" disabled>Previous</button>
-                        <button class="tutorial-button" onclick="nextStep()" id="nextBtn">Next</button>
-                        <button class="tutorial-button" onclick="skipTutorial()">Skip Tutorial</button>
-                    </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" id="autoDemo" checked onchange="toggleAutoDemo()"> Auto Demo
-                        </label>
-                    </div>
-                </div>
-                
-                <div class="tutorial-progress">
-                    <div class="tutorial-progress-bar" id="progressBar" style="width: 0%"></div>
-                </div>
-                
-                <div class="step-indicator" id="stepIndicator">
-                    <!-- Step dots will be generated here -->
-                </div>
-                
-                <!-- Tutorial Steps -->
-                <div class="tutorial-step active" id="step-1">
-                    <h4>Step 1: Welcome to the Smart LT Simulation</h4>
-                    <p>This interactive simulation demonstrates how our AI-powered system detects and responds to faults in Low Tension (LT) power distribution lines. You'll see 3 power lines with sensors that monitor electrical parameters in real-time.</p>
-                    <p><strong>What you'll learn:</strong> How AI detects faults, automatic isolation process, and self-healing power rerouting.</p>
-                </div>
-                
-                <div class="tutorial-step" id="step-2">
-                    <h4>Step 2: Understanding Normal Operation</h4>
-                    <p>Look at the circuit below. In normal operation:</p>
-                    <ul>
-                        <li><strong>Green lines:</strong> Healthy power lines carrying electricity</li>
-                        <li><strong>Green sensors (S11, S12, etc.):</strong> IoT sensors monitoring each line</li>
-                        <li><strong>Voltage & Current:</strong> Normal readings around 230V and 12-18A</li>
-                        <li><strong>AI Status:</strong> Shows "OPERATIONAL" with low anomaly scores</li>
-                    </ul>
-                </div>
-                
-                <div class="tutorial-step" id="step-3">
-                    <h4>Step 3: Simulating a Line Break</h4>
-                    <p>Now let's see what happens when a power line breaks (due to storms, accidents, etc.).</p>
-                    <p><strong>Try this:</strong> Click the "Cut Line 1" button below and observe:</p>
-                    <ul>
-                        <li>Line turns red (indicating fault)</li>
-                        <li>Sensors turn red and flash</li>
-                        <li>Voltage drops to 0V, Current drops to 0A</li>
-                        <li>AI detects the fault and shows high anomaly score</li>
-                    </ul>
-                    <button class="circuit-button danger highlighted" onclick="simulateLineFault(1)">Cut Line 1</button>
-                </div>
-                
-                <div class="tutorial-step" id="step-4">
-                    <h4>Step 4: AI Detection & Auto-Isolation</h4>
-                    <p>Watch the AI Analysis Engine (bottom panel) during a fault:</p>
-                    <ul>
-                        <li><strong>Anomaly Score:</strong> Jumps from 0.02 to 0.95 (indicating fault)</li>
-                        <li><strong>Fault Probability:</strong> Increases to 97%+</li>
-                        <li><strong>System Status:</strong> Changes to "FAULT DETECTED"</li>
-                        <li><strong>Auto-Isolation:</strong> Activates to protect the grid</li>
-                    </ul>
-                    <p>The system automatically isolates the faulty line and reroutes power through healthy lines.</p>
-                </div>
-                
-                <div class="tutorial-step" id="step-5">
-                    <h4>Step 5: Other Fault Types</h4>
-                    <p>Our system can detect various types of electrical faults:</p>
-                    <ul>
-                        <li><strong>Overload:</strong> Too much current flowing through a line</li>
-                        <li><strong>Arc Fault:</strong> Electrical arcing that can cause fires</li>
-                        <li><strong>Power Theft:</strong> Unauthorized connections</li>
-                    </ul>
-                    <p><strong>Try these:</strong></p>
-                    <button class="circuit-button danger highlighted" onclick="simulateOverload()" style="margin: 5px;">Overload</button>
-                    <button class="circuit-button danger highlighted" onclick="simulateArcFault()" style="margin: 5px;">Arc Fault</button>
-                </div>
-                
-                <div class="tutorial-step" id="step-6">
-                    <h4>Step 6: Understanding the Dashboard</h4>
-                    <p>The sensor readings panel shows real-time data from each line:</p>
-                    <ul>
-                        <li><strong>Voltage:</strong> Electrical pressure (normal: ~230V)</li>
-                        <li><strong>Current:</strong> Electrical flow (varies with load)</li>
-                        <li><strong>Status:</strong> NORMAL, WARNING, or FAULT</li>
-                    </ul>
-                    <p>The AI panel shows machine learning predictions and confidence levels, helping operators make informed decisions.</p>
-                </div>
-                
-                <div class="tutorial-step" id="step-7">
-                    <h4>Step 7: Interactive Exploration</h4>
-                    <p>You're now ready to explore independently! Try:</p>
-                    <ul>
-                        <li>Hovering over sensors and lines for tooltips</li>
-                        <li>Creating multiple faults and observing responses</li>
-                        <li>Using "Reset System" to clear all faults</li>
-                        <li>Using the "Send Technician" feature to check specific sensors</li>
-                    </ul>
-                    <p><strong>Remember:</strong> This represents real technology that's protecting power grids worldwide!</p>
-                    <button class="circuit-button highlighted" onclick="resetSystem()">Reset System</button>
-                </div>
-            </div>
-            
-            <div class="circuit-simulation">
-                <h3 style="margin-bottom: 1rem;">Virtual LT Power Distribution Network</h3>
-                
-                <div class="circuit-canvas" id="circuitCanvas">
-                    <!-- Power lines and sensors will be generated here -->
-                </div>
-                
-                <div class="circuit-controls">
-                    <button class="circuit-button" onclick="resetSystem()" title="Reset all systems to normal operation">Reset System</button>
-                    <button class="circuit-button danger" onclick="simulateLineFault(1)" title="Simulate a break in Line 1">Cut Line 1</button>
-                    <button class="circuit-button danger" onclick="simulateLineFault(2)" title="Simulate a break in Line 2">Cut Line 2</button>
-                    <button class="circuit-button danger" onclick="simulateLineFault(3)" title="Simulate a break in Line 3">Cut Line 3</button>
-                    <button class="circuit-button danger" onclick="simulateOverload()" title="Simulate electrical overload condition">Overload</button>
-                    <button class="circuit-button danger" onclick="simulateArcFault()" title="Simulate arc fault (fire hazard)">Arc Fault</button>
-                </div>
-                
-                <!-- Technician Dispatch System -->
-                <div class="technician-panel">
-                    <h4>Technician Dispatch System</h4>
-                    <p>Enter a sensor ID (e.g., S11, S32) to dispatch a technician for inspection:</p>
-                    <div class="technician-input-group">
-                        <input type="text" id="technicianInput" class="technician-input" placeholder="Enter sensor ID (e.g., S32)" maxlength="3">
-                        <button id="sendTechnicianBtn" class="technician-button" onclick="dispatchTechnician()">Send Technician</button>
-                    </div>
-                    <div id="technicianResponse" class="technician-response"></div>
-                </div>
-                
-                <div class="sensor-data-panel">
-                    <div class="sensor-reading">
-                        <h5>Line 1 Sensors</h5>
-                        <div id="sensor1-data">
-                            <div>Voltage: <span id="s1-voltage">230V</span></div>
-                            <div>Current: <span id="s1-current">15.2A</span></div>
-                            <div>Status: <span id="s1-status" class="status-normal">NORMAL</span></div>
-                        </div>
-                    </div>
-                    <div class="sensor-reading">
-                        <h5>Line 2 Sensors</h5>
-                        <div id="sensor2-data">
-                            <div>Voltage: <span id="s2-voltage">230V</span></div>
-                            <div>Current: <span id="s2-current">12.8A</span></div>
-                            <div>Status: <span id="s2-status" class="status-normal">NORMAL</span></div>
-                        </div>
-                    </div>
-                    <div class="sensor-reading">
-                        <h5>Line 3 Sensors</h5>
-                        <div id="sensor3-data">
-                            <div>Voltage: <span id="s3-voltage">230V</span></div>
-                            <div>Current: <span id="s3-current">18.5A</span></div>
-                            <div>Status: <span id="s3-status" class="status-normal">NORMAL</span></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="ai-prediction-panel">
-                    <h4>AI/ML Analysis Engine</h4>
-                    <div class="prediction-item">
-                        <span>System Status:</span>
-                        <span id="ai-system-status">OPERATIONAL</span>
-                    </div>
-                    <div class="prediction-item">
-                        <span>Anomaly Detection:</span>
-                        <span id="ai-anomaly">NORMAL (Score: 0.02)</span>
-                    </div>
-                    <div class="prediction-item">
-                        <span>Fault Probability:</span>
-                        <span id="ai-fault-prob">2.1%</span>
-                    </div>
-                    <div class="prediction-item">
-                        <span>Prediction Confidence:</span>
-                        <span id="ai-confidence">98.7%</span>
-                    </div>
-                    <div class="prediction-item">
-                        <span>Auto-Isolation:</span>
-                        <span id="ai-isolation">STANDBY</span>
-                    </div>
-                </div>
-                
-                <div class="legend">
-                    <h5>Status Legend:</h5>
-                    <div class="legend-item">
-                        <div class="legend-color normal"></div>
-                        <span>Normal Operation - System functioning properly</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color warning"></div>
-                        <span>Warning - Unusual conditions detected, monitoring closely</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color fault"></div>
-                        <span>Fault - Critical issue detected, isolation activated</span>
-                    </div>
-                </div>
-                
-                <div id="fault-alert" style="background: #f8d7da; padding: 1rem; border-radius: 4px; margin-top: 1rem; display: none; border-left: 4px solid #dc3545;">
-                    <strong>SYSTEM ALERT:</strong> <span id="fault-message"></span>
-                </div>
-            </div>
-        </div>
-    </section>
+<div class="alert" id="systemAlert">
+    <b>ALERT:</b> <span id="alertMessage"></span>
+</div>
 
-    <!-- Tooltip element -->
-    <div class="tooltip" id="tooltip"></div>
+<div class="dispatch-notification" id="dispatchNotification">
+    <b>🚨 AI AUTO-DISPATCH</b><br>
+    <span id="dispatchMessage"></span><br>
+    <small>ETA: <span id="dispatchETA"></span></small>
+</div>
 
-    <script>
-        // Enhanced Virtual Circuit System with Technician Dispatch
-        class InteractiveCircuit {
-            constructor() {
-                this.lines = [
-                    { id: 1, status: 'normal', voltage: 230, current: 15.2 },
-                    { id: 2, status: 'normal', voltage: 230, current: 12.8 },
-                    { id: 3, status: 'normal', voltage: 230, current: 18.5 }
-                ];
-                this.aiSystem = {
-                    anomalyScore: 0.02,
-                    faultProbability: 2.1,
-                    confidence: 98.7,
-                    status: 'OPERATIONAL'
-                };
-                
-                // Sensor-specific issue database
-                this.sensorIssues = {
-                    'S11': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S12': { hasIssue: true, description: 'Voltage fluctuation detected - minor instability' },
-                    'S13': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S14': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S21': { hasIssue: true, description: 'Overload warning - current exceeding normal threshold' },
-                    'S22': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S23': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S24': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S31': { hasIssue: false, description: 'Normal operation - all parameters within range' },
-                    'S32': { hasIssue: true, description: 'Loose connection detected - requires immediate attention' },
-                    'S33': { hasIssue: true, description: 'Arc signature detected - potential fire hazard' },
-                    'S34': { hasIssue: false, description: 'Normal operation - all parameters within range' }
-                };
-                
-                this.tutorialStep = 1;
-                this.totalSteps = 7;
-                this.tutorialActive = false;
-                this.autoDemo = true;
-                this.autoDemoInterval = null;
-                
-                this.initializeCircuit();
-                this.setupTooltips();
-                this.initializeTutorial();
-                this.startAutoDemo();
-            }
-
-            initializeTutorial() {
-                // Create step indicators
-                const stepIndicator = document.getElementById('stepIndicator');
-                stepIndicator.innerHTML = '';
-                
-                for (let i = 1; i <= this.totalSteps; i++) {
-                    const dot = document.createElement('div');
-                    dot.className = 'step-dot';
-                    dot.textContent = i;
-                    dot.onclick = () => this.goToStep(i);
-                    dot.title = `Go to step ${i}`;
-                    stepIndicator.appendChild(dot);
-                }
-                
-                this.updateTutorialUI();
-            }
-
-            initializeCircuit() {
-                const canvas = document.getElementById('circuitCanvas');
-                canvas.innerHTML = '';
-
-                // Create power lines and sensors with enhanced interactivity
-                for (let i = 0; i < 3; i++) {
-                    // Power line
-                    const line = document.createElement('div');
-                    line.className = 'power-line';
-                    line.id = `line-${i + 1}`;
-                    line.style.left = '50px';
-                    line.style.top = `${80 + i * 80}px`;
-                    line.style.width = '700px';
-                    line.setAttribute('data-tooltip', `Power Line ${i + 1} - Click to inspect`);
-                    line.onclick = () => this.inspectLine(i + 1);
-                    canvas.appendChild(line);
-
-                    // Line label
-                    const label = document.createElement('div');
-                    label.style.position = 'absolute';
-                    label.style.left = '10px';
-                    label.style.top = `${75 + i * 80}px`;
-                    label.style.fontSize = '12px';
-                    label.style.fontWeight = 'bold';
-                    label.textContent = `Line ${i + 1}`;
-                    canvas.appendChild(label);
-
-                    // Sensor nodes with enhanced tooltips
-                    for (let j = 0; j < 4; j++) {
-                        const sensor = document.createElement('div');
-                        const sensorId = `S${i + 1}${j + 1}`;
-                        sensor.className = 'sensor-node';
-                        sensor.id = `sensor-${i + 1}-${j + 1}`;
-                        sensor.style.left = `${80 + j * 170}px`;
-                        sensor.style.top = `${72 + i * 80}px`;
-                        sensor.textContent = sensorId;
-                        sensor.setAttribute('data-tooltip', `Sensor ${sensorId} - IoT device monitoring Line ${i + 1}\nClick to inspect or use technician dispatch`);
-                        sensor.onclick = () => this.inspectSensor(sensorId);
-                        
-                        // Add visual indication for sensors with issues
-                        if (this.sensorIssues[sensorId] && this.sensorIssues[sensorId].hasIssue) {
-                            sensor.style.border = '2px solid #ffc107';
-                        }
-                        
-                        canvas.appendChild(sensor);
-                    }
-                }
-
-                this.updateDisplay();
-            }
-
-            setupTooltips() {
-                const tooltip = document.getElementById('tooltip');
-                
-                document.addEventListener('mouseover', (e) => {
-                    if (e.target.hasAttribute('data-tooltip')) {
-                        const tooltipText = e.target.getAttribute('data-tooltip');
-                        tooltip.innerHTML = tooltipText.replace(/\n/g, '<br>');
-                        tooltip.style.left = (e.pageX + 10) + 'px';
-                        tooltip.style.top = (e.pageY - 10) + 'px';
-                        tooltip.classList.add('show');
-                    }
-                });
-
-                document.addEventListener('mouseout', (e) => {
-                    if (e.target.hasAttribute('data-tooltip')) {
-                        tooltip.classList.remove('show');
-                    }
-                });
-
-                document.addEventListener('mousemove', (e) => {
-                    if (tooltip.classList.contains('show')) {
-                        tooltip.style.left = (e.pageX + 10) + 'px';
-                        tooltip.style.top = (e.pageY - 10) + 'px';
-                    }
-                });
-            }
-
-            inspectLine(lineId) {
-                const line = this.lines.find(l => l.id === lineId);
-                alert(`Line ${lineId} Details:\nStatus: ${line.status.toUpperCase()}\nVoltage: ${line.voltage}V\nCurrent: ${line.current}A\n\nThis line supplies power to residential and commercial areas.`);
-            }
-
-            inspectSensor(sensorId) {
-                const issue = this.sensorIssues[sensorId];
-                const statusText = issue.hasIssue ? 'ISSUE DETECTED' : 'NORMAL';
-                alert(`Sensor ${sensorId} Details:\nType: IoT Smart Sensor\nStatus: ${statusText}\nDescription: ${issue.description}\n\nCapabilities:\n- Voltage/Current measurement\n- Arc fault detection\n- Temperature monitoring\n- GPS location tracking\n- LoRaWAN communication`);
-            }
-
-            dispatchTechnician() {
-                const input = document.getElementById('technicianInput').value.trim().toUpperCase();
-                const responseEl = document.getElementById('technicianResponse');
-                
-                if (!input) {
-                    this.showTechnicianResponse('Please enter a sensor ID (e.g., S11, S32)', 'error');
-                    return;
-                }
-                
-                // Validate input format
-                if (!/^S[1-3][1-4]$/.test(input)) {
-                    this.showTechnicianResponse('Invalid sensor ID. Use format: S11, S12, S21, etc.', 'error');
-                    return;
-                }
-                
-                const issue = this.sensorIssues[input];
-                if (issue) {
-                    if (issue.hasIssue) {
-                        this.showTechnicianResponse(`TECHNICIAN DISPATCHED to ${input}: ${issue.description}`, 'warning');
-                    } else {
-                        this.showTechnicianResponse(`INSPECTION COMPLETE at ${input}: ${issue.description}`, 'success');
-                    }
-                } else {
-                    this.showTechnicianResponse('Sensor not found in system', 'error');
-                }
-                
-                // Clear input
-                document.getElementById('technicianInput').value = '';
-            }
-
-            showTechnicianResponse(message, type) {
-                const responseEl = document.getElementById('technicianResponse');
-                responseEl.textContent = message;
-                responseEl.className = `technician-response ${type}`;
-                responseEl.style.display = 'block';
-                
-                // Auto-hide after 8 seconds
-                setTimeout(() => {
-                    responseEl.style.display = 'none';
-                }, 8000);
-            }
-
-            updateDisplay() {
-                // Update sensor readings with smooth transitions
-                this.lines.forEach(line => {
-                    const voltageEl = document.getElementById(`s${line.id}-voltage`);
-                    const currentEl = document.getElementById(`s${line.id}-current`);
-                    const statusEl = document.getElementById(`s${line.id}-status`);
-                    
-                    voltageEl.textContent = `${line.voltage}V`;
-                    currentEl.textContent = `${line.current}A`;
-                    statusEl.textContent = line.status.toUpperCase();
-                    statusEl.className = `status-${line.status}`;
-
-                    // Update visual elements
-                    const lineElement = document.getElementById(`line-${line.id}`);
-                    const sensors = document.querySelectorAll(`[id^="sensor-${line.id}-"]`);
-                    
-                    if (line.status === 'fault') {
-                        lineElement.className = 'power-line fault';
-                        sensors.forEach(sensor => {
-                            sensor.className = 'sensor-node fault';
-                        });
-                    } else if (line.status === 'warning') {
-                        lineElement.className = 'power-line';
-                        sensors.forEach(sensor => {
-                            sensor.className = 'sensor-node warning';
-                        });
-                    } else {
-                        lineElement.className = 'power-line';
-                        sensors.forEach(sensor => {
-                            sensor.className = 'sensor-node';
-                            // Restore issue indicators
-                            const sensorId = sensor.textContent;
-                            if (this.sensorIssues[sensorId] && this.sensorIssues[sensorId].hasIssue) {
-                                sensor.style.border = '2px solid #ffc107';
-                            }
-                        });
-                    }
-                });
-
-                // Update AI analysis with enhanced feedback
-                document.getElementById('ai-system-status').textContent = this.aiSystem.status;
-                document.getElementById('ai-anomaly').textContent = `${this.getAnomalyLevel()} (Score: ${this.aiSystem.anomalyScore.toFixed(2)})`;
-                document.getElementById('ai-fault-prob').textContent = `${this.aiSystem.faultProbability.toFixed(1)}%`;
-                document.getElementById('ai-confidence').textContent = `${this.aiSystem.confidence.toFixed(1)}%`;
-            }
-
-            getAnomalyLevel() {
-                if (this.aiSystem.anomalyScore > 0.8) return 'HIGH ALERT';
-                if (this.aiSystem.anomalyScore > 0.5) return 'MEDIUM';
-                if (this.aiSystem.anomalyScore > 0.2) return 'LOW';
-                return 'NORMAL';
-            }
-
-            simulateLineFault(lineId) {
-                const line = this.lines.find(l => l.id === lineId);
-                if (line) {
-                    line.status = 'fault';
-                    line.voltage = 0;
-                    line.current = 0;
-                    
-                    this.aiSystem.anomalyScore = 0.95;
-                    this.aiSystem.faultProbability = 97.2;
-                    this.aiSystem.confidence = 99.1;
-                    this.aiSystem.status = 'FAULT DETECTED';
-                    
-                    this.showAlert(`LINE ${lineId} BREAK DETECTED! AI system activated auto-isolation. Emergency maintenance crews dispatched. Estimated repair time: 2-4 hours.`);
-                    document.getElementById('ai-isolation').textContent = 'ACTIVATED';
-                    
-                    this.updateDisplay();
-                    
-                    // Enhanced auto-recovery sequence
-                    setTimeout(() => {
-                        this.isolateAndReroute(lineId);
-                    }, 3000);
-                }
-            }
-
-            isolateAndReroute(faultedLineId) {
-                // Simulate intelligent rerouting
-                this.lines.forEach(line => {
-                    if (line.id !== faultedLineId && line.status === 'normal') {
-                        line.status = 'warning';
-                        line.current = Math.min(line.current * 1.3, 25);
-                        line.voltage = Math.max(line.voltage - 5, 220);
-                    }
-                });
-                
-                this.aiSystem.status = 'POWER REROUTED';
-                this.aiSystem.anomalyScore = 0.25;
-                this.aiSystem.faultProbability = 15.3;
-                
-                this.showAlert(`Smart grid activated! Power automatically rerouted through healthy lines. System operating at 85% capacity. No service interruption for customers.`);
-                this.updateDisplay();
-            }
-
-            simulateOverload() {
-                const line = this.lines[0];
-                line.status = 'warning';
-                line.current = 42.5;
-                line.voltage = 225;
-                
-                this.aiSystem.anomalyScore = 0.67;
-                this.aiSystem.faultProbability = 34.8;
-                this.aiSystem.status = 'OVERLOAD DETECTED';
-                
-                this.showAlert('OVERLOAD detected on Line 1! AI system automatically redistributing load across other lines. Load balancing in progress...');
-                document.getElementById('ai-isolation').textContent = 'LOAD BALANCING';
-                
-                this.updateDisplay();
-                
-                setTimeout(() => {
-                    line.status = 'normal';
-                    line.current = 15.2;
-                    line.voltage = 230;
-                    this.resetAI();
-                    this.showAlert('Load balancing successful! System returned to normal operation.');
-                    setTimeout(() => this.hideAlert(), 3000);
-                }, 5000);
-            }
-
-            simulateArcFault() {
-                const line = this.lines[2];
-                line.status = 'warning';
-                line.current = 11.2;
-                line.voltage = 220;
-                
-                this.aiSystem.anomalyScore = 0.78;
-                this.aiSystem.faultProbability = 76.3;
-                this.aiSystem.status = 'ARC FAULT DETECTED';
-                
-                this.showAlert('ARC FAULT detected on Line 3! Fire hazard identified. Maintenance crew with arc fault equipment dispatched to GPS location: 28.6139°N, 77.2090°E');
-                document.getElementById('ai-isolation').textContent = 'ARC MONITORING';
-                
-                this.updateDisplay();
-                
-                setTimeout(() => {
-                    line.status = 'normal';
-                    line.current = 18.5;
-                    line.voltage = 230;
-                    this.resetAI();
-                    this.showAlert('Arc fault cleared by maintenance team. Line restored to service.');
-                    setTimeout(() => this.hideAlert(), 3000);
-                }, 6000);
-            }
-
-            resetSystem() {
-                this.lines.forEach(line => {
-                    line.status = 'normal';
-                    if (line.id === 1) { line.voltage = 230; line.current = 15.2; }
-                    if (line.id === 2) { line.voltage = 230; line.current = 12.8; }
-                    if (line.id === 3) { line.voltage = 230; line.current = 18.5; }
-                });
-                
-                this.resetAI();
-                this.hideAlert();
-                this.updateDisplay();
-            }
-
-            resetAI() {
-                this.aiSystem.anomalyScore = 0.02;
-                this.aiSystem.faultProbability = 2.1;
-                this.aiSystem.confidence = 98.7;
-                this.aiSystem.status = 'OPERATIONAL';
-                document.getElementById('ai-isolation').textContent = 'STANDBY';
-            }
-
-            showAlert(message) {
-                const alert = document.getElementById('fault-alert');
-                document.getElementById('fault-message').textContent = message;
-                alert.style.display = 'block';
-            }
-
-            hideAlert() {
-                document.getElementById('fault-alert').style.display = 'none';
-            }
-
-            startAutoDemo() {
-                if (this.autoDemo && !this.tutorialActive) {
-                    this.autoDemoInterval = setInterval(() => {
-                        const demos = [
-                            () => this.simulateOverload(),
-                            () => this.simulateArcFault(),
-                            () => this.simulateLineFault(Math.floor(Math.random() * 3) + 1)
-                        ];
-                        const randomDemo = demos[Math.floor(Math.random() * demos.length)];
-                        randomDemo();
-                    }, 15000);
-                }
-            }
-
-            stopAutoDemo() {
-                if (this.autoDemoInterval) {
-                    clearInterval(this.autoDemoInterval);
-                    this.autoDemoInterval = null;
-                }
-            }
-
-            // Tutorial methods
-            startTutorial() {
-                this.tutorialActive = true;
-                this.tutorialStep = 1;
-                this.stopAutoDemo();
-                this.resetSystem();
-                this.updateTutorialUI();
-            }
-
-            nextStep() {
-                if (this.tutorialStep < this.totalSteps) {
-                    this.tutorialStep++;
-                    this.updateTutorialUI();
-                }
-            }
-
-            prevStep() {
-                if (this.tutorialStep > 1) {
-                    this.tutorialStep--;
-                    this.updateTutorialUI();
-                }
-            }
-
-            goToStep(step) {
-                this.tutorialStep = step;
-                this.updateTutorialUI();
-            }
-
-            skipTutorial() {
-                this.tutorialActive = false;
-                this.hideTutorialSteps();
-                if (document.getElementById('autoDemo').checked) {
-                    this.startAutoDemo();
-                }
-            }
-
-            hideTutorialSteps() {
-                for (let i = 1; i <= this.totalSteps; i++) {
-                    document.getElementById(`step-${i}`).classList.remove('active');
-                }
-            }
-
-            updateTutorialUI() {
-                // Update progress bar
-                const progress = (this.tutorialStep / this.totalSteps) * 100;
-                document.getElementById('progressBar').style.width = `${progress}%`;
-
-                // Update step indicators
-                const dots = document.querySelectorAll('.step-dot');
-                dots.forEach((dot, index) => {
-                    dot.classList.remove('active', 'completed');
-                    if (index + 1 === this.tutorialStep) {
-                        dot.classList.add('active');
-                    } else if (index + 1 < this.tutorialStep) {
-                        dot.classList.add('completed');
-                    }
-                });
-
-                // Show current step
-                this.hideTutorialSteps();
-                document.getElementById(`step-${this.tutorialStep}`).classList.add('active');
-
-                // Update navigation buttons
-                document.getElementById('prevBtn').disabled = this.tutorialStep === 1;
-                document.getElementById('nextBtn').disabled = this.tutorialStep === this.totalSteps;
-                
-                if (this.tutorialStep === this.totalSteps) {
-                    document.getElementById('nextBtn').textContent = 'Finish';
-                    document.getElementById('nextBtn').onclick = () => this.skipTutorial();
-                } else {
-                    document.getElementById('nextBtn').textContent = 'Next';
-                    document.getElementById('nextBtn').onclick = () => this.nextStep();
-                }
-            }
-        }
-
-        // Initialize the interactive circuit
-        let circuit;
-        document.addEventListener('DOMContentLoaded', function() {
-            circuit = new InteractiveCircuit();
-        });
-
-        // Global control functions
-        function startTutorial() { circuit.startTutorial(); }
-        function nextStep() { circuit.nextStep(); }
-        function prevStep() { circuit.prevStep(); }
-        function skipTutorial() { circuit.skipTutorial(); }
-        function resetSystem() { circuit.resetSystem(); }
-        function simulateLineFault(lineId) { circuit.simulateLineFault(lineId); }
-        function simulateOverload() { circuit.simulateOverload(); }
-        function simulateArcFault() { circuit.simulateArcFault(); }
-        function dispatchTechnician() { circuit.dispatchTechnician(); }
-
-        function toggleAutoDemo() {
-            const autoDemo = document.getElementById('autoDemo').checked;
-            circuit.autoDemo = autoDemo;
-            if (autoDemo && !circuit.tutorialActive) {
-                circuit.startAutoDemo();
-            } else {
-                circuit.stopAutoDemo();
-            }
-        }
-
-        // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+<script>
+class BasicSmartLT {
+    constructor() {
+        this.lines = [];
+        for (let i = 1; i <= 3; i++) {
+            this.lines.push({
+                id: i,
+                status: 'normal',
+                current: 12 + Math.random() * 8,
+                voltage: 230,
+                tilt: 'Normal'
             });
+        }
+        
+        this.sensors = {};
+        this.relays = {};
+        
+        // Generate sensors (5 per line)
+        for (let i = 1; i <= 3; i++) {
+            for (let j = 1; j <= 5; j++) {
+                const sensorId = `S${i}${j}`;
+                this.sensors[sensorId] = {
+                    current: 12 + Math.random() * 6,
+                    voltage: 225 + Math.random() * 10,
+                    status: Math.random() > 0.85 ? 'WARNING' : 'OK',
+                    line: i,
+                    aiAction: 'Monitor'
+                };
+            }
+            
+            // Generate relays (3 per line)
+            for (let j = 1; j <= 3; j++) {
+                const relayId = `R${i}${j}`;
+                this.relays[relayId] = {
+                    status: 'CLOSED',
+                    current: 10 + Math.random() * 8,
+                    line: i
+                };
+            }
+        }
+        
+        this.aiSystem = {
+            status: 'OPERATIONAL',
+            anomalyScore: 0.02,
+            faultProb: 2.1,
+            dispatchStatus: 'READY',
+            repairETA: 'N/A'
+        };
+        
+        this.initCircuit();
+        this.initTables();
+        this.startHeartbeat();
+    }
+    
+    initCircuit() {
+        const area = document.getElementById('circuitArea');
+        // Don't clear completely - preserve simulation box
+        const existingElements = area.querySelectorAll(':not(.simulation-box)');
+        existingElements.forEach(el => el.remove());
+        
+        const startX = 40;
+        const poleSpacing = 130;
+        
+        for (let i = 0; i < 3; i++) {
+            const lineY = 40 + i * 90;
+            
+            // Power line
+            const line = document.createElement('div');
+            line.className = 'power-line';
+            line.id = `line-${i + 1}`;
+            line.style.left = startX + 'px';
+            line.style.top = lineY + 'px';
+            line.style.width = '820px';
+            area.appendChild(line);
+            
+            // Line label
+            const label = document.createElement('div');
+            label.style.position = 'absolute';
+            label.style.left = '5px';
+            label.style.top = (lineY - 2) + 'px';
+            label.style.fontSize = '10px';
+            label.textContent = `L${i + 1}`;
+            area.appendChild(label);
+            
+            // Poles and sensors
+            for (let j = 0; j < 6; j++) {
+                const poleX = startX + j * poleSpacing;
+                
+                // Pole
+                const pole = document.createElement('div');
+                pole.className = 'pole';
+                pole.style.left = poleX + 'px';
+                pole.style.top = (lineY - 10) + 'px';
+                area.appendChild(pole);
+                
+                // Sensor (5 sensors per line)
+                if (j < 5) {
+                    const sensorId = `S${i + 1}${j + 1}`;
+                    const sensor = document.createElement('div');
+                    sensor.className = 'sensor';
+                    sensor.id = `sensor-${sensorId}`;
+                    sensor.style.left = (poleX + 30) + 'px';
+                    sensor.style.top = (lineY - 15) + 'px';
+                    sensor.textContent = sensorId;
+                    
+                    if (this.sensors[sensorId].status === 'WARNING') {
+                        sensor.style.background = 'orange';
+                    }
+                    
+                    area.appendChild(sensor);
+                }
+            }
+        }
+    }
+    
+    initTables() {
+        // Populate sensor table (show only first 8 for space)
+        const sensorTable = document.getElementById('sensorTable');
+        let count = 0;
+        Object.keys(this.sensors).forEach(id => {
+            if (count >= 8) return;
+            const sensor = this.sensors[id];
+            const row = sensorTable.insertRow();
+            row.innerHTML = `
+                <td>${id}</td>
+                <td id="ct-${id}">${sensor.current.toFixed(1)}</td>
+                <td id="v-${id}">${sensor.voltage.toFixed(0)}</td>
+                <td id="status-${id}" class="status-${sensor.status.toLowerCase()}">${sensor.status}</td>
+                <td id="ai-${id}">${sensor.aiAction}</td>
+            `;
+            count++;
         });
-    </script>
+        
+        // Populate relay table (show first 6)
+        const relayTable = document.getElementById('relayTable');
+        count = 0;
+        Object.keys(this.relays).forEach(id => {
+            if (count >= 6) return;
+            const relay = this.relays[id];
+            const row = relayTable.insertRow();
+            row.innerHTML = `
+                <td>${id}</td>
+                <td id="relay-status-${id}">${relay.status}</td>
+                <td id="relay-current-${id}">${relay.current.toFixed(1)}A</td>
+            `;
+            count++;
+        });
+    }
+    
+    startHeartbeat() {
+        setInterval(() => {
+            const time = new Date().toLocaleTimeString();
+            this.addLogEntry(`${time} - Heartbeat: 15 sensors active`);
+        }, 15000);
+    }
+    
+    autoDispatchCrew(faultLocation, faultType, sensorId) {
+        const repairTime = 3000 + Math.random() * 2000;
+        const eta = Math.round(repairTime / 1000);
+        
+        document.getElementById('dispatchMessage').textContent = `${faultType} at ${faultLocation}`;
+        document.getElementById('dispatchETA').textContent = `${eta}s`;
+        document.getElementById('dispatchNotification').classList.add('show');
+        
+        this.aiSystem.dispatchStatus = 'CREW DISPATCHED';
+        this.aiSystem.repairETA = `${eta}s`;
+        this.updateAIDisplay();
+        
+        this.addLogEntry(`AI DISPATCH: Crew to ${faultLocation}`);
+        
+        setTimeout(() => {
+            document.getElementById('dispatchNotification').classList.remove('show');
+        }, 2000);
+        
+        return repairTime;
+    }
+    
+    simulateLineFault(lineId) {
+        const line = this.lines.find(l => l.id === lineId);
+        if (!line) return;
+        
+        line.status = 'fault';
+        line.current = 0;
+        line.voltage = 0;
+        
+        const lineEl = document.getElementById(`line-${lineId}`);
+        lineEl.classList.add('fault');
+        
+        // Update affected sensors
+        Object.keys(this.sensors).forEach(id => {
+            if (this.sensors[id].line === lineId) {
+                this.sensors[id].current = 0;
+                this.sensors[id].voltage = 0;
+                this.sensors[id].status = 'FAULT';
+                this.sensors[id].aiAction = 'CREW SENT';
+                
+                const ctEl = document.getElementById(`ct-${id}`);
+                const vEl = document.getElementById(`v-${id}`);
+                const statusEl = document.getElementById(`status-${id}`);
+                const aiEl = document.getElementById(`ai-${id}`);
+                
+                if (ctEl) ctEl.textContent = '0.0';
+                if (vEl) vEl.textContent = '0';
+                if (statusEl) {
+                    statusEl.textContent = 'FAULT';
+                    statusEl.className = 'status-fault';
+                }
+                if (aiEl) aiEl.textContent = 'CREW SENT';
+                
+                const sensorEl = document.getElementById(`sensor-${id}`);
+                if (sensorEl) sensorEl.classList.add('fault');
+            }
+        });
+        
+        this.aiSystem.status = 'FAULT DETECTED';
+        this.aiSystem.anomalyScore = 0.95;
+        this.aiSystem.faultProb = 97.2;
+        
+        this.updateAIDisplay();
+        this.showAlert(`LINE ${lineId} BREAK! AI crew dispatched. Auto-repair in progress.`);
+        this.addLogEntry(`FAULT: Line ${lineId} break detected`);
+        
+        const primarySensor = `S${lineId}1`;
+        const repairTime = this.autoDispatchCrew(`Line ${lineId}`, 'Wire Break', primarySensor);
+        
+        setTimeout(() => this.autoIsolate(lineId), 500);
+        setTimeout(() => this.autoRepair(lineId), repairTime);
+    }
+    
+    simulateOverload() {
+        const lineId = Math.floor(Math.random() * 3) + 1;
+        const sensorId = `S${lineId}2`;
+        
+        if (this.sensors[sensorId]) {
+            this.sensors[sensorId].current = 35.5;
+            this.sensors[sensorId].status = 'FAULT';
+            this.sensors[sensorId].aiAction = 'CREW SENT';
+            
+            const ctEl = document.getElementById(`ct-${sensorId}`);
+            const statusEl = document.getElementById(`status-${sensorId}`);
+            const aiEl = document.getElementById(`ai-${sensorId}`);
+            
+            if (ctEl) ctEl.textContent = '35.5';
+            if (statusEl) {
+                statusEl.textContent = 'OVERLOAD';
+                statusEl.className = 'status-fault';
+            }
+            if (aiEl) aiEl.textContent = 'CREW SENT';
+            
+            const sensorEl = document.getElementById(`sensor-${sensorId}`);
+            if (sensorEl) sensorEl.classList.add('fault');
+            
+            this.aiSystem.status = 'OVERLOAD DETECTED';
+            this.aiSystem.anomalyScore = 0.67;
+            this.aiSystem.faultProb = 34.8;
+            this.updateAIDisplay();
+            
+            this.showAlert(`⚡ OVERLOAD at ${sensorId}! Current: 35.5A. AI crew dispatched.`);
+            
+            const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Electrical Overload', sensorId);
+            
+            setTimeout(() => {
+                this.sensors[sensorId].current = 14.2;
+                this.sensors[sensorId].status = 'OK';
+                this.sensors[sensorId].aiAction = 'Monitor';
+                
+                if (ctEl) ctEl.textContent = '14.2';
+                if (statusEl) {
+                    statusEl.textContent = 'OK';
+                    statusEl.className = 'status-ok';
+                }
+                if (aiEl) aiEl.textContent = 'Monitor';
+                if (sensorEl) sensorEl.classList.remove('fault');
+                
+                this.aiSystem.status = 'OPERATIONAL';
+                this.aiSystem.anomalyScore = 0.02;
+                this.aiSystem.faultProb = 2.1;
+                this.aiSystem.dispatchStatus = 'READY';
+                this.aiSystem.repairETA = 'N/A';
+                this.updateAIDisplay();
+                
+                this.showAlert('✅ Overload resolved by AI crew.');
+            }, repairTime);
+        }
+    }
+    
+    simulateArcFault() {
+        const lineId = Math.floor(Math.random() * 3) + 1;
+        const sensorId = `S${lineId}3`;
+        
+        if (this.sensors[sensorId]) {
+            this.sensors[sensorId].voltage = 180;
+            this.sensors[sensorId].status = 'FAULT';
+            this.sensors[sensorId].aiAction = 'FIRE CREW';
+            
+            const vEl = document.getElementById(`v-${sensorId}`);
+            const statusEl = document.getElementById(`status-${sensorId}`);
+            const aiEl = document.getElementById(`ai-${sensorId}`);
+            
+            if (vEl) vEl.textContent = '180';
+            if (statusEl) {
+                statusEl.textContent = 'ARC FAULT';
+                statusEl.className = 'status-fault';
+            }
+            if (aiEl) aiEl.textContent = 'FIRE CREW';
+            
+            const sensorEl = document.getElementById(`sensor-${sensorId}`);
+            if (sensorEl) sensorEl.classList.add('fault');
+            
+            this.aiSystem.status = 'ARC FAULT DETECTED';
+            this.aiSystem.anomalyScore = 0.78;
+            this.aiSystem.faultProb = 76.3;
+            this.updateAIDisplay();
+            
+            this.showAlert(`🔥 ARC FAULT at ${sensorId}! Fire risk detected. AI fire crew dispatched.`);
+            
+            const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Arc Fault (Fire Risk)', sensorId);
+            
+            setTimeout(() => {
+                this.sensors[sensorId].voltage = 230;
+                this.sensors[sensorId].status = 'OK';
+                this.sensors[sensorId].aiAction = 'Monitor';
+                
+                if (vEl) vEl.textContent = '230';
+                if (statusEl) {
+                    statusEl.textContent = 'OK';
+                    statusEl.className = 'status-ok';
+                }
+                if (aiEl) aiEl.textContent = 'Monitor';
+                if (sensorEl) sensorEl.classList.remove('fault');
+                
+                this.aiSystem.status = 'OPERATIONAL';
+                this.aiSystem.anomalyScore = 0.02;
+                this.aiSystem.faultProb = 2.1;
+                this.aiSystem.dispatchStatus = 'READY';
+                this.aiSystem.repairETA = 'N/A';
+                this.updateAIDisplay();
+                
+                this.showAlert('✅ Arc fault cleared by AI fire crew.');
+            }, repairTime);
+        }
+    }
+    
+    autoIsolate(lineId) {
+        Object.keys(this.relays).forEach(id => {
+            if (this.relays[id].line === lineId) {
+                this.relays[id].status = 'OPEN';
+                this.relays[id].current = 0;
+                
+                const statusEl = document.getElementById(`relay-status-${id}`);
+                const currentEl = document.getElementById(`relay-current-${id}`);
+                if (statusEl) statusEl.textContent = 'OPEN';
+                if (currentEl) currentEl.textContent = '0.0A';
+            }
+        });
+        
+        this.addLogEntry(`ISOLATION: Line ${lineId} isolated`);
+    }
+    
+    autoRepair(lineId) {
+        const line = this.lines.find(l => l.id === lineId);
+        if (!line) return;
+        
+        const lineEl = document.getElementById(`line-${lineId}`);
+        lineEl.classList.remove('fault');
+        lineEl.classList.add('repairing');
+        
+        Object.keys(this.sensors).forEach(id => {
+            if (this.sensors[id].line === lineId) {
+                this.sensors[id].status = 'REPAIRING';
+                this.sensors[id].aiAction = 'REPAIR';
+                
+                const statusEl = document.getElementById(`status-${id}`);
+                const aiEl = document.getElementById(`ai-${id}`);
+                if (statusEl) {
+                    statusEl.textContent = 'REPAIR';
+                    statusEl.className = 'status-repairing';
+                }
+                if (aiEl) aiEl.textContent = 'REPAIR';
+                
+                const sensorEl = document.getElementById(`sensor-${id}`);
+                if (sensorEl) {
+                    sensorEl.classList.remove('fault');
+                    sensorEl.classList.add('repairing');
+                }
+            }
+        });
+        
+        this.addLogEntry(`REPAIR: Line ${lineId} repair started`);
+        
+        setTimeout(() => this.completeRepair(lineId), 1500);
+    }
+    
+    completeRepair(lineId) {
+        const line = this.lines.find(l => l.id === lineId);
+        if (!line) return;
+        
+        line.status = 'normal';
+        line.current = 12 + Math.random() * 6;
+        line.voltage = 230;
+        
+        const lineEl = document.getElementById(`line-${lineId}`);
+        lineEl.classList.remove('fault', 'repairing');
+        
+        Object.keys(this.sensors).forEach(id => {
+            if (this.sensors[id].line === lineId) {
+                this.sensors[id].current = line.current + Math.random() * 2;
+                this.sensors[id].voltage = line.voltage;
+                this.sensors[id].status = 'OK';
+                this.sensors[id].aiAction = 'Monitor';
+                
+                const ctEl = document.getElementById(`ct-${id}`);
+                const vEl = document.getElementById(`v-${id}`);
+                const statusEl = document.getElementById(`status-${id}`);
+                const aiEl = document.getElementById(`ai-${id}`);
+                
+                if (ctEl) ctEl.textContent = this.sensors[id].current.toFixed(1);
+                if (vEl) vEl.textContent = this.sensors[id].voltage.toFixed(0);
+                if (statusEl) {
+                    statusEl.textContent = 'OK';
+                    statusEl.className = 'status-ok';
+                }
+                if (aiEl) aiEl.textContent = 'Monitor';
+                
+                const sensorEl = document.getElementById(`sensor-${id}`);
+                if (sensorEl) {
+                    sensorEl.classList.remove('fault', 'repairing');
+                }
+            }
+        });
+        
+        Object.keys(this.relays).forEach(id => {
+            if (this.relays[id].line === lineId) {
+                this.relays[id].status = 'CLOSED';
+                this.relays[id].current = 10 + Math.random() * 8;
+                
+                const statusEl = document.getElementById(`relay-status-${id}`);
+                const currentEl = document.getElementById(`relay-current-${id}`);
+                if (statusEl) statusEl.textContent = 'CLOSED';
+                if (currentEl) currentEl.textContent = `${this.relays[id].current.toFixed(1)}A`;
+            }
+        });
+        
+        this.aiSystem.status = 'OPERATIONAL';
+        this.aiSystem.anomalyScore = 0.02;
+        this.aiSystem.faultProb = 2.1;
+        this.aiSystem.dispatchStatus = 'READY';
+        this.aiSystem.repairETA = 'N/A';
+        
+        this.updateAIDisplay();
+        this.showAlert(`✅ Line ${lineId} repair complete! AI system restored.`);
+        this.addLogEntry(`COMPLETE: Line ${lineId} fully restored`);
+    }
+    
+    updateAIDisplay() {
+        document.getElementById('ai-status').textContent = this.aiSystem.status;
+        document.getElementById('anomaly').textContent = this.aiSystem.anomalyScore.toFixed(2);
+        document.getElementById('fault-prob').textContent = `${this.aiSystem.faultProb.toFixed(1)}%`;
+        document.getElementById('dispatch-status').textContent = this.aiSystem.dispatchStatus;
+        document.getElementById('repair-eta').textContent = this.aiSystem.repairETA;
+    }
+    
+    showAlert(message) {
+        document.getElementById('alertMessage').textContent = message;
+        document.getElementById('systemAlert').style.display = 'block';
+        
+        setTimeout(() => {
+            document.getElementById('systemAlert').style.display = 'none';
+        }, 4000);
+    }
+    
+    addLogEntry(entry) {
+        const log = document.getElementById('eventLog');
+        const time = new Date().toLocaleTimeString();
+        log.value = `${time} - ${entry}\n` + log.value;
+        // Keep only first 8 lines
+        const lines = log.value.split('\n');
+        if (lines.length > 8) {
+            log.value = lines.slice(0, 8).join('\n');
+        }
+    }
+    
+    resetSystem() {
+        location.reload();
+    }
+}
+
+// Initialize system
+let system;
+document.addEventListener('DOMContentLoaded', function() {
+    system = new BasicSmartLT();
+});
+
+// Global functions
+function resetSystem() { system.resetSystem(); }
+function simulateLineFault(lineId) { system.simulateLineFault(lineId); }
+function simulateOverload() { system.simulateOverload(); }
+function simulateArcFault() { system.simulateArcFault(); }
+</script>
+
 </body>
 </html>

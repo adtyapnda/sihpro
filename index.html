@@ -424,7 +424,7 @@ class BasicSmartLT {
         this.aiSystem.faultProb = 60 + Math.random() * 25;
         this.updateAIDisplay();
         
-        this.showAlert(`⚡ AUTO-DETECTED OVERLOAD at ${sensorId}! Current: ${this.sensors[sensorId].current.toFixed(1)}A. AI crew dispatched.`);
+        this.showAlert(`AUTO-DETECTED OVERLOAD at ${sensorId}! Current: ${this.sensors[sensorId].current.toFixed(1)}A. AI crew dispatched.`);
         this.addLogEntry(`AUTO-FAULT: Overload detected at ${sensorId}`);
         
         const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Electrical Overload', sensorId);
@@ -458,7 +458,7 @@ class BasicSmartLT {
         this.aiSystem.faultProb = 70 + Math.random() * 20;
         this.updateAIDisplay();
         
-        this.showAlert(`🔥 AUTO-DETECTED ARC FAULT at ${sensorId}! Fire risk detected. AI fire crew dispatched.`);
+        this.showAlert(`AUTO-DETECTED ARC FAULT at ${sensorId}! Fire risk detected. AI dispatched fire crew.`);
         this.addLogEntry(`AUTO-FAULT: Arc fault detected at ${sensorId}`);
         
         const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Arc Fault (Fire Risk)', sensorId);
@@ -769,3 +769,4 @@ function simulateLineFault(lineId) { system.simulateLineFault(lineId); }
 </script>
 </body>
 </html>
+

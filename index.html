@@ -70,54 +70,9 @@
             background: brown;
         }
         
-        /* Simulation Box Styles */
-        .simulation-box {
-            position: absolute;
-            border: 2px solid #007bff;
-            background: #f0f8ff;
-            border-radius: 8px;
-            padding: 10px;
-            width: 140px;
-            height: 120px;
-        }
-        
-        .sim-box-title {
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 8px;
-            color: #007bff;
-        }
-        
-        .sim-button {
-            width: 100%;
-            padding: 6px;
-            margin: 3px 0;
-            font-size: 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .sim-button.overload {
-            background: #ff6b35;
-            color: white;
-        }
-        
-        .sim-button.arc {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .sim-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 2fr;
             gap: 10px;
             margin-top: 10px;
         }
@@ -179,7 +134,7 @@
         
         textarea {
             width: 100%;
-            height: 60px;
+            height: 150px;
             font-size: 10px;
         }
         
@@ -194,32 +149,15 @@
     </style>
 </head>
 <body>
-
 <h2>Smart LT Line Fault Detection & Auto-AI Dispatch System</h2>
-
 <div class="controls">
     <button onclick="resetSystem()">Reset</button>
     <button class="danger" onclick="simulateLineFault(1)">Break L1</button>
     <button class="danger" onclick="simulateLineFault(2)">Break L2</button>
     <button class="danger" onclick="simulateLineFault(3)">Break L3</button>
 </div>
-
 <div class="circuit-area" id="circuitArea">
-    <!-- Simulation Box -->
-    <div class="simulation-box" style="left: 870px; top: 20px;">
-        <div class="sim-box-title">⚡ FAULT SIMULATOR</div>
-        <button class="sim-button overload" onclick="simulateOverload()">
-            🔥 OVERLOAD
-        </button>
-        <button class="sim-button arc" onclick="simulateArcFault()">
-            ⚡ ARC FAULT
-        </button>
-        <div style="font-size: 8px; text-align: center; margin-top: 5px; color: #666;">
-            AI Auto-Dispatch Enabled
-        </div>
-    </div>
 </div>
-
 <div class="main-grid">
     <!-- Left Panel: Sensor Data -->
     <div class="panel">
@@ -252,20 +190,18 @@
         <textarea id="eventLog" readonly>System ready - 3 lines, 15 sensors active
 AI Auto-Dispatch: ARMED
 Fault detection: ACTIVE
+Random fault simulation: ENABLED
 All sensors normal</textarea>
     </div>
 </div>
-
 <div class="alert" id="systemAlert">
     <b>ALERT:</b> <span id="alertMessage"></span>
 </div>
-
 <div class="dispatch-notification" id="dispatchNotification">
     <b>🚨 AI AUTO-DISPATCH</b><br>
     <span id="dispatchMessage"></span><br>
     <small>ETA: <span id="dispatchETA"></span></small>
 </div>
-
 <script>
 class BasicSmartLT {
     constructor() {
@@ -318,13 +254,12 @@ class BasicSmartLT {
         this.initCircuit();
         this.initTables();
         this.startHeartbeat();
+        this.startRandomFaults();
     }
     
     initCircuit() {
         const area = document.getElementById('circuitArea');
-        // Don't clear completely - preserve simulation box
-        const existingElements = area.querySelectorAll(':not(.simulation-box)');
-        existingElements.forEach(el => el.remove());
+        area.innerHTML = '';
         
         const startX = 40;
         const poleSpacing = 130;
@@ -418,8 +353,193 @@ class BasicSmartLT {
     startHeartbeat() {
         setInterval(() => {
             const time = new Date().toLocaleTimeString();
-            this.addLogEntry(`${time} - Heartbeat: 15 sensors active`);
+            this.addLogEntry(`Heartbeat: 15 sensors active`);
         }, 15000);
+    }
+    
+    startRandomFaults() {
+        // Random sensor failures every 10-30 seconds
+        const scheduleNextFault = () => {
+            const delay = 10000 + Math.random() * 20000; // 10-30 seconds
+            setTimeout(() => {
+                this.simulateRandomSensorFault();
+                scheduleNextFault();
+            }, delay);
+        };
+        
+        // Start first fault after 5-15 seconds
+        setTimeout(() => {
+            scheduleNextFault();
+        }, 5000 + Math.random() * 10000);
+    }
+    
+    simulateRandomSensorFault() {
+        // Only create faults if no major line faults exist
+        const healthySensors = Object.keys(this.sensors).filter(id => 
+            this.sensors[id].status === 'OK' || this.sensors[id].status === 'WARNING'
+        );
+        
+        if (healthySensors.length === 0) return;
+        
+        const sensorId = healthySensors[Math.floor(Math.random() * healthySensors.length)];
+        const faultTypes = ['OVERLOAD', 'ARC_FAULT', 'VOLTAGE_DROP'];
+        const faultType = faultTypes[Math.floor(Math.random() * faultTypes.length)];
+        
+        switch (faultType) {
+            case 'OVERLOAD':
+                this.simulateOverloadAtSensor(sensorId);
+                break;
+            case 'ARC_FAULT':
+                this.simulateArcFaultAtSensor(sensorId);
+                break;
+            case 'VOLTAGE_DROP':
+                this.simulateVoltageDrop(sensorId);
+                break;
+        }
+    }
+    
+    simulateOverloadAtSensor(sensorId) {
+        if (!this.sensors[sensorId]) return;
+        
+        this.sensors[sensorId].current = 30 + Math.random() * 10;
+        this.sensors[sensorId].status = 'FAULT';
+        this.sensors[sensorId].aiAction = 'CREW SENT';
+        
+        const ctEl = document.getElementById(`ct-${sensorId}`);
+        const statusEl = document.getElementById(`status-${sensorId}`);
+        const aiEl = document.getElementById(`ai-${sensorId}`);
+        
+        if (ctEl) ctEl.textContent = this.sensors[sensorId].current.toFixed(1);
+        if (statusEl) {
+            statusEl.textContent = 'OVERLOAD';
+            statusEl.className = 'status-fault';
+        }
+        if (aiEl) aiEl.textContent = 'CREW SENT';
+        
+        const sensorEl = document.getElementById(`sensor-${sensorId}`);
+        if (sensorEl) sensorEl.classList.add('fault');
+        
+        this.aiSystem.status = 'OVERLOAD DETECTED';
+        this.aiSystem.anomalyScore = 0.60 + Math.random() * 0.20;
+        this.aiSystem.faultProb = 60 + Math.random() * 25;
+        this.updateAIDisplay();
+        
+        this.showAlert(`⚡ AUTO-DETECTED OVERLOAD at ${sensorId}! Current: ${this.sensors[sensorId].current.toFixed(1)}A. AI crew dispatched.`);
+        this.addLogEntry(`AUTO-FAULT: Overload detected at ${sensorId}`);
+        
+        const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Electrical Overload', sensorId);
+        
+        setTimeout(() => this.repairSensor(sensorId, 'overload'), repairTime);
+    }
+    
+    simulateArcFaultAtSensor(sensorId) {
+        if (!this.sensors[sensorId]) return;
+        
+        this.sensors[sensorId].voltage = 150 + Math.random() * 50;
+        this.sensors[sensorId].status = 'FAULT';
+        this.sensors[sensorId].aiAction = 'FIRE CREW';
+        
+        const vEl = document.getElementById(`v-${sensorId}`);
+        const statusEl = document.getElementById(`status-${sensorId}`);
+        const aiEl = document.getElementById(`ai-${sensorId}`);
+        
+        if (vEl) vEl.textContent = this.sensors[sensorId].voltage.toFixed(0);
+        if (statusEl) {
+            statusEl.textContent = 'ARC FAULT';
+            statusEl.className = 'status-fault';
+        }
+        if (aiEl) aiEl.textContent = 'FIRE CREW';
+        
+        const sensorEl = document.getElementById(`sensor-${sensorId}`);
+        if (sensorEl) sensorEl.classList.add('fault');
+        
+        this.aiSystem.status = 'ARC FAULT DETECTED';
+        this.aiSystem.anomalyScore = 0.70 + Math.random() * 0.20;
+        this.aiSystem.faultProb = 70 + Math.random() * 20;
+        this.updateAIDisplay();
+        
+        this.showAlert(`🔥 AUTO-DETECTED ARC FAULT at ${sensorId}! Fire risk detected. AI fire crew dispatched.`);
+        this.addLogEntry(`AUTO-FAULT: Arc fault detected at ${sensorId}`);
+        
+        const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Arc Fault (Fire Risk)', sensorId);
+        
+        setTimeout(() => this.repairSensor(sensorId, 'arc'), repairTime);
+    }
+    
+    simulateVoltageDrop(sensorId) {
+        if (!this.sensors[sensorId]) return;
+        
+        this.sensors[sensorId].voltage = 180 + Math.random() * 30;
+        this.sensors[sensorId].status = 'FAULT';
+        this.sensors[sensorId].aiAction = 'CREW SENT';
+        
+        const vEl = document.getElementById(`v-${sensorId}`);
+        const statusEl = document.getElementById(`status-${sensorId}`);
+        const aiEl = document.getElementById(`ai-${sensorId}`);
+        
+        if (vEl) vEl.textContent = this.sensors[sensorId].voltage.toFixed(0);
+        if (statusEl) {
+            statusEl.textContent = 'LOW VOLTAGE';
+            statusEl.className = 'status-fault';
+        }
+        if (aiEl) aiEl.textContent = 'CREW SENT';
+        
+        const sensorEl = document.getElementById(`sensor-${sensorId}`);
+        if (sensorEl) sensorEl.classList.add('fault');
+        
+        this.aiSystem.status = 'VOLTAGE FAULT DETECTED';
+        this.aiSystem.anomalyScore = 0.45 + Math.random() * 0.20;
+        this.aiSystem.faultProb = 45 + Math.random() * 25;
+        this.updateAIDisplay();
+        
+        this.showAlert(`⚠️ AUTO-DETECTED VOLTAGE DROP at ${sensorId}! Voltage: ${this.sensors[sensorId].voltage.toFixed(0)}V. AI dispatched crew .`);
+        this.addLogEntry(`AUTO-FAULT: Voltage drop detected at ${sensorId}`);
+        
+        const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Voltage Drop', sensorId); 
+        
+        setTimeout(() => this.repairSensor(sensorId, 'voltage'), repairTime);
+    }
+    
+    repairSensor(sensorId, faultType) {
+        if (!this.sensors[sensorId]) return;
+        
+        this.sensors[sensorId].current = 12 + Math.random() * 6;
+        this.sensors[sensorId].voltage = 225 + Math.random() * 10;
+        this.sensors[sensorId].status = 'OK';
+        this.sensors[sensorId].aiAction = 'Monitor';
+        
+        const ctEl = document.getElementById(`ct-${sensorId}`);
+        const vEl = document.getElementById(`v-${sensorId}`);
+        const statusEl = document.getElementById(`status-${sensorId}`);
+        const aiEl = document.getElementById(`ai-${sensorId}`);
+        
+        if (ctEl) ctEl.textContent = this.sensors[sensorId].current.toFixed(1);
+        if (vEl) vEl.textContent = this.sensors[sensorId].voltage.toFixed(0);
+        if (statusEl) {
+            statusEl.textContent = 'OK';
+            statusEl.className = 'status-ok';
+        }
+        if (aiEl) aiEl.textContent = 'Monitor';
+        
+        const sensorEl = document.getElementById(`sensor-${sensorId}`);
+        if (sensorEl) sensorEl.classList.remove('fault', 'repairing');
+        
+        // Check if all sensors are healthy
+        const faultySensors = Object.keys(this.sensors).filter(id => 
+            this.sensors[id].status === 'FAULT' || this.sensors[id].status === 'REPAIRING'
+        );
+        
+        if (faultySensors.length === 0) {
+            this.aiSystem.status = 'OPERATIONAL';
+            this.aiSystem.anomalyScore = 0.02;
+            this.aiSystem.faultProb = 2.1;
+            this.aiSystem.dispatchStatus = 'READY';
+            this.aiSystem.repairETA = 'N/A';
+            this.updateAIDisplay();
+        }
+        
+        this.showAlert(`✅ ${faultType.toUpperCase()} at ${sensorId} resolved by AI crew.`);
+        this.addLogEntry(`REPAIR-COMPLETE: ${sensorId} restored to normal`);
     }
     
     autoDispatchCrew(faultLocation, faultType, sensorId) {
@@ -493,120 +613,6 @@ class BasicSmartLT {
         
         setTimeout(() => this.autoIsolate(lineId), 500);
         setTimeout(() => this.autoRepair(lineId), repairTime);
-    }
-    
-    simulateOverload() {
-        const lineId = Math.floor(Math.random() * 3) + 1;
-        const sensorId = `S${lineId}2`;
-        
-        if (this.sensors[sensorId]) {
-            this.sensors[sensorId].current = 35.5;
-            this.sensors[sensorId].status = 'FAULT';
-            this.sensors[sensorId].aiAction = 'CREW SENT';
-            
-            const ctEl = document.getElementById(`ct-${sensorId}`);
-            const statusEl = document.getElementById(`status-${sensorId}`);
-            const aiEl = document.getElementById(`ai-${sensorId}`);
-            
-            if (ctEl) ctEl.textContent = '35.5';
-            if (statusEl) {
-                statusEl.textContent = 'OVERLOAD';
-                statusEl.className = 'status-fault';
-            }
-            if (aiEl) aiEl.textContent = 'CREW SENT';
-            
-            const sensorEl = document.getElementById(`sensor-${sensorId}`);
-            if (sensorEl) sensorEl.classList.add('fault');
-            
-            this.aiSystem.status = 'OVERLOAD DETECTED';
-            this.aiSystem.anomalyScore = 0.67;
-            this.aiSystem.faultProb = 34.8;
-            this.updateAIDisplay();
-            
-            this.showAlert(`⚡ OVERLOAD at ${sensorId}! Current: 35.5A. AI crew dispatched.`);
-            
-            const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Electrical Overload', sensorId);
-            
-            setTimeout(() => {
-                this.sensors[sensorId].current = 14.2;
-                this.sensors[sensorId].status = 'OK';
-                this.sensors[sensorId].aiAction = 'Monitor';
-                
-                if (ctEl) ctEl.textContent = '14.2';
-                if (statusEl) {
-                    statusEl.textContent = 'OK';
-                    statusEl.className = 'status-ok';
-                }
-                if (aiEl) aiEl.textContent = 'Monitor';
-                if (sensorEl) sensorEl.classList.remove('fault');
-                
-                this.aiSystem.status = 'OPERATIONAL';
-                this.aiSystem.anomalyScore = 0.02;
-                this.aiSystem.faultProb = 2.1;
-                this.aiSystem.dispatchStatus = 'READY';
-                this.aiSystem.repairETA = 'N/A';
-                this.updateAIDisplay();
-                
-                this.showAlert('✅ Overload resolved by AI crew.');
-            }, repairTime);
-        }
-    }
-    
-    simulateArcFault() {
-        const lineId = Math.floor(Math.random() * 3) + 1;
-        const sensorId = `S${lineId}3`;
-        
-        if (this.sensors[sensorId]) {
-            this.sensors[sensorId].voltage = 180;
-            this.sensors[sensorId].status = 'FAULT';
-            this.sensors[sensorId].aiAction = 'FIRE CREW';
-            
-            const vEl = document.getElementById(`v-${sensorId}`);
-            const statusEl = document.getElementById(`status-${sensorId}`);
-            const aiEl = document.getElementById(`ai-${sensorId}`);
-            
-            if (vEl) vEl.textContent = '180';
-            if (statusEl) {
-                statusEl.textContent = 'ARC FAULT';
-                statusEl.className = 'status-fault';
-            }
-            if (aiEl) aiEl.textContent = 'FIRE CREW';
-            
-            const sensorEl = document.getElementById(`sensor-${sensorId}`);
-            if (sensorEl) sensorEl.classList.add('fault');
-            
-            this.aiSystem.status = 'ARC FAULT DETECTED';
-            this.aiSystem.anomalyScore = 0.78;
-            this.aiSystem.faultProb = 76.3;
-            this.updateAIDisplay();
-            
-            this.showAlert(`🔥 ARC FAULT at ${sensorId}! Fire risk detected. AI fire crew dispatched.`);
-            
-            const repairTime = this.autoDispatchCrew(`Sensor ${sensorId}`, 'Arc Fault (Fire Risk)', sensorId);
-            
-            setTimeout(() => {
-                this.sensors[sensorId].voltage = 230;
-                this.sensors[sensorId].status = 'OK';
-                this.sensors[sensorId].aiAction = 'Monitor';
-                
-                if (vEl) vEl.textContent = '230';
-                if (statusEl) {
-                    statusEl.textContent = 'OK';
-                    statusEl.className = 'status-ok';
-                }
-                if (aiEl) aiEl.textContent = 'Monitor';
-                if (sensorEl) sensorEl.classList.remove('fault');
-                
-                this.aiSystem.status = 'OPERATIONAL';
-                this.aiSystem.anomalyScore = 0.02;
-                this.aiSystem.faultProb = 2.1;
-                this.aiSystem.dispatchStatus = 'READY';
-                this.aiSystem.repairETA = 'N/A';
-                this.updateAIDisplay();
-                
-                this.showAlert('✅ Arc fault cleared by AI fire crew.');
-            }, repairTime);
-        }
     }
     
     autoIsolate(lineId) {
@@ -741,10 +747,10 @@ class BasicSmartLT {
         const log = document.getElementById('eventLog');
         const time = new Date().toLocaleTimeString();
         log.value = `${time} - ${entry}\n` + log.value;
-        // Keep only first 8 lines
+        // Keep only first 12 lines (more space now)
         const lines = log.value.split('\n');
-        if (lines.length > 8) {
-            log.value = lines.slice(0, 8).join('\n');
+        if (lines.length > 12) {
+            log.value = lines.slice(0, 12).join('\n');
         }
     }
     
@@ -752,19 +758,14 @@ class BasicSmartLT {
         location.reload();
     }
 }
-
 // Initialize system
 let system;
 document.addEventListener('DOMContentLoaded', function() {
     system = new BasicSmartLT();
 });
-
 // Global functions
 function resetSystem() { system.resetSystem(); }
 function simulateLineFault(lineId) { system.simulateLineFault(lineId); }
-function simulateOverload() { system.simulateOverload(); }
-function simulateArcFault() { system.simulateArcFault(); }
 </script>
-
 </body>
 </html>
